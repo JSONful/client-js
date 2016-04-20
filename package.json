@@ -1,0 +1,16 @@
+{
+  "name": "jsonful",
+  "version": "0.1.1",
+  "description": "JSONful javascript client",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "coffeebar": "^1.0.0",
+    "promise-coffee": "^1.1.2",
+    "xmlhttprequest": "^1.8.0"
+  }
+}
