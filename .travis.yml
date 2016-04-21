@@ -16,6 +16,6 @@ node_js:
 before_script:
     - npm install
     - sudo apt-get install curl php5-cli git
-    - curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+    - curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/bin --filename=composer
 
 script: npm test
