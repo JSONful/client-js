@@ -25,7 +25,13 @@ describe('Booting', function() {
         process.chdir(__dirname + "/server-php")
         spawn("composer", ["install"])
             .on('close', function() {
-                spawn("php", ["-S", "127.0.0.1:9999", "index.php"]);
+                var php = spawn("php", ["-S", "127.0.0.1:9999", "index.php"]);
+                php.stderr.on('data', function(data) {
+                    console.error(""+data);
+                });
+                php.stdout.on('data', function(data) {
+                    console.error(""+data);
+                });
 
                 setTimeout(function() {
                     http.get('http://127.0.0.1:9999', function(res) {
@@ -35,7 +41,7 @@ describe('Booting', function() {
                         expect(false).to.equal(true);
                         done();
                     });
-                }, 50);
+                }, 100);
             });
     });
 });
