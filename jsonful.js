@@ -1,8 +1,8 @@
 (function() {
-  var EventEmitter, JSONful, Promise, defaultOnReject, defaultOnResolve, isFunction, module, push, setImmediate,
+  var EventEmitter, JSONful, Promise, defaultOnReject, defaultOnResolve, isFunction, merge, module, push, setImmediate,
     slice = [].slice,
-    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
+    hasProp = {}.hasOwnProperty,
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   EventEmitter = (function() {
     function EventEmitter() {
@@ -77,14 +77,28 @@
 
   setImmediate = setTimeout;
 
+  merge = function(a, b) {
+    var key, value;
+    for (key in b) {
+      if (!hasProp.call(b, key)) continue;
+      value = b[key];
+      a[key] = value;
+    }
+    return a;
+  };
+
   JSONful = (function(superClass) {
     extend(JSONful, superClass);
 
     function JSONful(server) {
       this.server = server;
       this._queue = [];
+      this._headers = {};
       this._callback = this._sendRequest.bind(this);
       JSONful.__super__.constructor.call(this);
+      this.on('session', (function(sessionId) {
+        return this._headers['session'] = sessionId;
+      }).bind(this));
     }
 
     JSONful.prototype._xhrRequest = function(reqBody, onready) {
@@ -97,9 +111,9 @@
       xhr.open("POST", this.server, true);
       xhr.responseType = 'json';
       xhr.setRequestHeader("Content-Type", "application/json");
-      return xhr.send(JSON.stringify({
+      return xhr.send(JSON.stringify(merge({
         requests: reqBody
-      }));
+      }, this._headers)));
     };
 
     JSONful.prototype.handle_responses = function(responses, queue) {
@@ -146,6 +160,11 @@
       return this._queue = [];
     };
 
+    JSONful.prototype.setSession = function(sessionId) {
+      this._headers['session'] = sessionId;
+      return this;
+    };
+
     JSONful.prototype.exec = function(name, args, callback) {
       var promise;
       if (args == null) {
@@ -153,6 +172,10 @@
       }
       if (callback == null) {
         callback = null;
+      }
+      if (typeof args === "function") {
+        callback = args;
+        args = [];
       }
       promise = new Promise((function(success, failure) {
         return this._queue.push({

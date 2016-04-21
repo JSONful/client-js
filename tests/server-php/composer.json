@@ -1,0 +1,12 @@
+{
+    "name": "jsonful/server-php-demo",
+    "authors": [
+        {
+            "name": "Cesar Rodas",
+            "email": "cesar@rodas.me"
+        }
+    ],
+    "require": {
+        "jsonful/server": "dev-develop"
+    }
+}
