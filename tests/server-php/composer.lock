@@ -1,0 +1,305 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "hash": "b1b6bae2e6aadd4c25f48094d9df8213",
+    "content-hash": "76bc50a2f6c4384631eb979f61126def",
+    "packages": [
+        {
+            "name": "crodas/class-info",
+            "version": "v0.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/crodas/ClassInfo.git",
+                "reference": "b0d23d92263c1c2ca68677a7e72ee2486176e40d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/crodas/ClassInfo/zipball/b0d23d92263c1c2ca68677a7e72ee2486176e40d",
+                "reference": "b0d23d92263c1c2ca68677a7e72ee2486176e40d",
+                "shasum": ""
+            },
+            "require": {
+                "nikic/php-parser": "^2.0 | ^1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "crodas": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-4-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "César D. Rodas",
+                    "email": "crodas@php.net"
+                }
+            ],
+            "description": "Get classes and functions defined in a given file",
+            "time": "2016-02-18 19:18:19"
+        },
+        {
+            "name": "crodas/file-util",
+            "version": "v0.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/crodas/FileUtils.git",
+                "reference": "e5726aac8cd187cd18d0bd2f4cc6f4f6d2efc097"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/crodas/FileUtils/zipball/e5726aac8cd187cd18d0bd2f4cc6f4f6d2efc097",
+                "reference": "e5726aac8cd187cd18d0bd2f4cc6f4f6d2efc097",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "crodas": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-4-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "César D. Rodas",
+                    "email": "crodas@php.net"
+                }
+            ],
+            "description": "Useful libraries to manipulate files",
+            "time": "2016-01-08 19:26:21"
+        },
+        {
+            "name": "crodas/function-discovery",
+            "version": "v0.6.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/crodas/function-discovery.git",
+                "reference": "0c564af13d045b5b8c66153d2e1c9fae7d3483a5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/crodas/function-discovery/zipball/0c564af13d045b5b8c66153d2e1c9fae7d3483a5",
+                "reference": "0c564af13d045b5b8c66153d2e1c9fae7d3483a5",
+                "shasum": ""
+            },
+            "require": {
+                "crodas/file-util": "^0.2",
+                "crodas/notoj": ">= 1.2"
+            },
+            "require-dev": {
+                "crodas/simple-view-engine": "^0.1"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/FunctionDiscovery.php"
+                ],
+                "psr-0": {
+                    "FunctionDiscovery": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-4-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Cesar Rodas",
+                    "email": "crodas@php.net"
+                }
+            ],
+            "description": "Discover and remember functions in the filesystem using annotations",
+            "time": "2016-03-19 19:59:48"
+        },
+        {
+            "name": "crodas/notoj",
+            "version": "v1.3.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/crodas/Notoj.git",
+                "reference": "8bc8f6d2ba661229090491a838f70ccf558fb4ef"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/crodas/Notoj/zipball/8bc8f6d2ba661229090491a838f70ccf558fb4ef",
+                "reference": "8bc8f6d2ba661229090491a838f70ccf558fb4ef",
+                "shasum": ""
+            },
+            "require": {
+                "crodas/class-info": "^0.2",
+                "crodas/file-util": ">= 0.2",
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Notoj": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-4-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "César D. Rodas",
+                    "email": "crodas@php.net"
+                }
+            ],
+            "description": "Annotation parser. Uses reflection and provides cache out of the box.",
+            "time": "2016-04-04 07:51:27"
+        },
+        {
+            "name": "jsonful/server",
+            "version": "dev-develop",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/JSONful/server.git",
+                "reference": "8a32f11883c083c070720e2bbd333231628a510a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/JSONful/server/zipball/8a32f11883c083c070720e2bbd333231628a510a",
+                "reference": "8a32f11883c083c070720e2bbd333231628a510a",
+                "shasum": ""
+            },
+            "require": {
+                "crodas/function-discovery": "^0.6.1",
+                "pimple/pimple": "^1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "JSONful": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Cesar Rodas",
+                    "email": "cesar@rodas.me"
+                }
+            ],
+            "description": "JSON server",
+            "time": "2016-04-20 17:39:43"
+        },
+        {
+            "name": "nikic/php-parser",
+            "version": "v2.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nikic/PHP-Parser.git",
+                "reference": "47b254ea51f1d6d5dc04b9b299e88346bf2369e3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/47b254ea51f1d6d5dc04b9b299e88346bf2369e3",
+                "reference": "47b254ea51f1d6d5dc04b9b299e88346bf2369e3",
+                "shasum": ""
+            },
+            "require": {
+                "ext-tokenizer": "*",
+                "php": ">=5.4"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.0"
+            },
+            "bin": [
+                "bin/php-parse"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.1-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PhpParser\\": "lib/PhpParser"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Nikita Popov"
+                }
+            ],
+            "description": "A PHP parser written in PHP",
+            "keywords": [
+                "parser",
+                "php"
+            ],
+            "time": "2016-04-19 13:41:41"
+        },
+        {
+            "name": "pimple/pimple",
+            "version": "v1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/silexphp/Pimple.git",
+                "reference": "2019c145fe393923f3441b23f29bbdfaa5c58c4d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/silexphp/Pimple/zipball/2019c145fe393923f3441b23f29bbdfaa5c58c4d",
+                "reference": "2019c145fe393923f3441b23f29bbdfaa5c58c4d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Pimple": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                }
+            ],
+            "description": "Pimple is a simple Dependency Injection Container for PHP 5.3",
+            "homepage": "http://pimple.sensiolabs.org",
+            "keywords": [
+                "container",
+                "dependency injection"
+            ],
+            "time": "2013-11-22 08:30:29"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "jsonful/server": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}

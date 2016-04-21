@@ -1,11 +1,20 @@
 module = {};
 setImmediate = setTimeout;
 
+merge = (a, b) ->
+    for own key, value of b 
+        a[key] = value;
+    a
+
 class JSONful extends EventEmitter
     constructor: (@server) ->
         @_queue = []
+        @_headers = {}
         @_callback = @_sendRequest.bind(this)
         super()
+        @on 'session', ((sessionId) ->
+                @_headers['session'] = sessionId
+            ).bind(this)
 
     _xhrRequest: (reqBody, onready) ->
         xhr = JSONful.getXhr()
@@ -16,8 +25,9 @@ class JSONful extends EventEmitter
         xhr.open "POST", @server, true
         xhr.responseType = 'json'
         xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.send JSON.stringify 
-            requests: reqBody
+        xhr.send JSON.stringify(merge 
+                requests: reqBody
+            , @_headers)
 
 
     handle_responses: (responses, queue) ->
@@ -51,8 +61,16 @@ class JSONful extends EventEmitter
 
         @_queue = []
 
+    setSession: (sessionId) ->
+        @_headers['session'] = sessionId
+        @
+
 
     exec: (name, args = [], callback = null) ->
+        if (typeof args == "function")
+            callback = args;
+            args     = [];
+
         promise = new Promise ((success, failure) ->
              @_queue.push({name: name, args: args, success: success, failure: failure})
             ).bind(this)
