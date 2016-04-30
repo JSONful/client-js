@@ -19,8 +19,19 @@ class JSONful extends EventEmitter
     _xhrRequest: (reqBody, onready) ->
         xhr = JSONful.getXhr()
         xhr.onload  = onready
-        xhr.onerror = () ->
-            console.error xhr.responseText
+        xhr.onerror = (() ->
+                try
+                    response = xhr.response || xhr.responseText
+                catch e
+                    response = ""
+                error = new Error(response)
+                error.status = xhr.status
+                this.emit("error", error, (() ->
+                    this._xhrRequest(reqBody, onready)
+                ).bind(this))
+            ).bind(this)
+
+        this.emit("request")
 
         xhr.open "POST", @server, true
         xhr.responseType = 'json'
@@ -46,7 +57,12 @@ class JSONful extends EventEmitter
 
         that = @;
         @_xhrRequest requestBody, () -> 
-            responses = if not @response and typeof @responseText == "string" then JSON.parse @responseText else @response
+            try
+                responses = if not @response and typeof @responseText == "string" then JSON.parse @responseText else @response
+            catch e
+                responses = ""
+
+            that.emit("response")
 
             if not responses or not (responses instanceof Object) or not (responses.responses instanceof Array)
                 that.emit("error", new Error("Invalid response from the server"), requestBody)

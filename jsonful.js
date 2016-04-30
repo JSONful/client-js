@@ -105,9 +105,21 @@
       var xhr;
       xhr = JSONful.getXhr();
       xhr.onload = onready;
-      xhr.onerror = function() {
-        return console.error(xhr.responseText);
-      };
+      xhr.onerror = (function() {
+        var e, error, error1, response;
+        try {
+          response = xhr.response || xhr.responseText;
+        } catch (error1) {
+          e = error1;
+          response = "";
+        }
+        error = new Error(response);
+        error.status = xhr.status;
+        return this.emit("error", error, (function() {
+          return this._xhrRequest(reqBody, onready);
+        }).bind(this));
+      }).bind(this);
+      this.emit("request");
       xhr.open("POST", this.server, true);
       xhr.responseType = 'json';
       xhr.setRequestHeader("Content-Type", "application/json");
@@ -139,8 +151,14 @@
       });
       that = this;
       this._xhrRequest(requestBody, function() {
-        var key, responses, results, value;
-        responses = !this.response && typeof this.responseText === "string" ? JSON.parse(this.responseText) : this.response;
+        var e, error1, key, responses, results, value;
+        try {
+          responses = !this.response && typeof this.responseText === "string" ? JSON.parse(this.responseText) : this.response;
+        } catch (error1) {
+          e = error1;
+          responses = "";
+        }
+        that.emit("response");
         if (!responses || !(responses instanceof Object) || !(responses.responses instanceof Array)) {
           that.emit("error", new Error("Invalid response from the server"), requestBody);
           return;
@@ -230,14 +248,14 @@
 
   module.exports = Promise = (function() {
     function Promise(executor) {
-      var err, error, reject, resolve;
+      var err, error1, reject, resolve;
       this._reactions = [];
       resolve = this._resolve(true);
       reject = this._resolve(false);
       try {
         executor(resolve, reject);
-      } catch (error) {
-        err = error;
+      } catch (error1) {
+        err = error1;
         reject(err);
       }
     }
@@ -254,12 +272,12 @@
           var enqueue;
           enqueue = _this._settled ? setImmediate : push.bind(_this._reactions);
           return enqueue(function() {
-            var callback, err, error, result;
+            var callback, err, error1, result;
             callback = _this._success ? onResolve : onReject;
             try {
               result = callback(_this._result);
-            } catch (error) {
-              err = error;
+            } catch (error1) {
+              err = error1;
               return reject(err);
             }
             return resolve(result);
@@ -275,7 +293,7 @@
     Promise.prototype._resolve = function(success) {
       return (function(_this) {
         return function(result) {
-          var err, error, promise, reason;
+          var err, error1, promise, reason;
           if (_this._resolved) {
             return;
           }
@@ -287,8 +305,8 @@
             }
             try {
               promise = _this.constructor._normalizeThenable(result);
-            } catch (error) {
-              err = error;
+            } catch (error1) {
+              err = error1;
               return _this._settle(false, err);
             }
             if (promise) {
@@ -322,11 +340,11 @@
     };
 
     Promise.resolve = function(value) {
-      var err, error, promise;
+      var err, error1, promise;
       try {
         promise = this._normalizeThenable(value);
-      } catch (error) {
-        err = error;
+      } catch (error1) {
+        err = error1;
         return this.reject(err);
       }
       return promise || new this(function(resolve, reject) {
