@@ -21,7 +21,7 @@ class JSONful extends EventEmitter
         xhr.onload  = onready
         xhr.onerror = (() ->
                 try
-                    response = xhr.response || xhr.responseText
+                    response = if 'response' in xhr then xhr.response else JSON.parse xhr.responseText
                 catch e
                     response = ""
                 error = new Error(response)
@@ -58,7 +58,7 @@ class JSONful extends EventEmitter
         that = @;
         @_xhrRequest requestBody, () -> 
             try
-                responses = if not @response and typeof @responseText == "string" then JSON.parse @responseText else @response
+                responses = if 'response' in @ then @response else JSON.parse @responseText
             catch e
                 responses = ""
 
