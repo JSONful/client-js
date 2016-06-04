@@ -2,7 +2,8 @@
   var EventEmitter, JSONful, Promise, defaultOnReject, defaultOnResolve, isFunction, merge, module, push, setImmediate,
     slice = [].slice,
     hasProp = {}.hasOwnProperty,
-    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   EventEmitter = (function() {
     function EventEmitter() {
@@ -108,7 +109,7 @@
       xhr.onerror = (function() {
         var e, error, error1, response;
         try {
-          response = xhr.response || xhr.responseText;
+          response = indexOf.call(xhr, 'response') >= 0 ? xhr.response : JSON.parse(xhr.responseText);
         } catch (error1) {
           e = error1;
           response = "";
@@ -153,7 +154,7 @@
       this._xhrRequest(requestBody, function() {
         var e, error1, key, responses, results, value;
         try {
-          responses = !this.response && typeof this.responseText === "string" ? JSON.parse(this.responseText) : this.response;
+          responses = indexOf.call(this, 'response') >= 0 ? this.response : JSON.parse(this.responseText);
         } catch (error1) {
           e = error1;
           responses = "";
