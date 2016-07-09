@@ -9,12 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "coffeebar": "^1.0.0",
-    "promise-coffee": "^1.1.2",
+    "promise": "^7.1.1",
     "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^2.4.5"
+    "webpack": "^1.13.1"
   }
 }
