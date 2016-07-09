@@ -204,7 +204,6 @@ var JSONful =
 	};
 
 	exports.Client = Client;
-	exports.JSONful = Client;
 	exports.Promise = Promise;
 
 /***/ },
