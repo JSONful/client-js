@@ -4,7 +4,8 @@
   "description": "JSONful javascript client",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha tests"
+    "test": "./node_modules/.bin/mocha tests",
+    "build": "./node_modules/.bin/babel ./src --presets babel-preset-es2015 --out-dir ./distribution"
   },
   "author": "",
   "license": "ISC",
@@ -13,6 +14,7 @@
     "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {
+    "babel-cli": "^6.10.1",
     "chai": "^3.5.0",
     "mocha": "^2.4.5",
     "webpack": "^1.13.1"
