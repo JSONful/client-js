@@ -2,7 +2,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var spawn = require('child_process').spawn;
 var http  = require('http');
-var JSONful = require('../index.js').JSONful;
+var JSONful = require('../index.js').Client;
 
 var client = new JSONful("http://127.0.0.1:9999");
 
