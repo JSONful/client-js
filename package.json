@@ -10,7 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "promise": "^7.1.1",
+    "lie": "^3.0.4",
+    "micro-events": "^1.0.0",
     "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {

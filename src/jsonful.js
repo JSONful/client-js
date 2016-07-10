@@ -1,5 +1,5 @@
-var EventEmitter = require('events');
-var Promise = require('promise');
+var EventEmitter = require('micro-events');
+var Promise = require('lie');
 
 class Client extends EventEmitter {
     constructor(...args) {
