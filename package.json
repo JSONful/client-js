@@ -1,6 +1,6 @@
 {
   "name": "jsonful",
-  "version": "0.1.4",
+  "version": "0.2.1",
   "description": "JSONful javascript client",
   "main": "index.js",
   "scripts": {
