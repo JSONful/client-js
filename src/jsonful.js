@@ -47,7 +47,7 @@ class Client extends EventEmitter {
 
         this.emit("request", request);
         xhr.open("POST", this.server, true);
-        xhr.resposneType = 'json';
+        xhr.responseType = 'json';
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.send(JSON.stringify(request));
     }
