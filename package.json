@@ -12,6 +12,8 @@
   "dependencies": {
     "lie": "^3.0.4",
     "micro-events": "^1.0.0",
+    "node-localstorage": "^1.3.0",
+    "nsstorage": "0.0.3",
     "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {

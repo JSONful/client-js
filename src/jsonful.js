@@ -1,16 +1,25 @@
 var EventEmitter = require('micro-events');
 var Promise = require('lie');
+var Session = require('./session');
 
 class Client extends EventEmitter {
     constructor(...args) {
         super(...args);
-        this.server = args[0];
+        this.url    = args[0];
         this._wait  = 50;
         this._queue = [];
         this._headers = {};
+        this._session = null;
+
+        Session.load(Client.getStorage(), this);
+
         this.on('session', (sessionId) => {
-            this._headers['session'] = sessionId;
+            Session.create(Client.getStorage(), sessionId, this);
         });
+    }
+
+    session() {
+        return this._session;
     }
 
     handle_responses(responses, queue) {
@@ -46,7 +55,7 @@ class Client extends EventEmitter {
         let request = Object.assign({}, {requests: body}, this._headers);
 
         this.emit("request", request);
-        xhr.open("POST", this.server, true);
+        xhr.open("POST", this.url, true);
         xhr.responseType = 'json';
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.send(JSON.stringify(request));
@@ -108,6 +117,10 @@ class Client extends EventEmitter {
         return promise;
     }
 }
+
+Client.getStorage = () => {
+    return localStorage;
+};
 
 Client.getXhr = () => {
     return new XMLHttpRequest;

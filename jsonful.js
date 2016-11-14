@@ -59,6 +59,7 @@ var JSONful =
 
 	var EventEmitter = __webpack_require__(1);
 	var Promise = __webpack_require__(2);
+	var Session = __webpack_require__(5);
 
 	var Client = function (_EventEmitter) {
 	    _inherits(Client, _EventEmitter);
@@ -74,17 +75,26 @@ var JSONful =
 
 	        var _this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Client)).call.apply(_Object$getPrototypeO, [this].concat(args)));
 
-	        _this.server = args[0];
+	        _this.url = args[0];
 	        _this._wait = 50;
 	        _this._queue = [];
 	        _this._headers = {};
+	        _this._session = null;
+
+	        Session.load(Client.getStorage(), _this);
+
 	        _this.on('session', function (sessionId) {
-	            _this._headers['session'] = sessionId;
+	            Session.create(Client.getStorage(), sessionId, _this);
 	        });
 	        return _this;
 	    }
 
 	    _createClass(Client, [{
+	        key: 'session',
+	        value: function session() {
+	            return this._session;
+	        }
+	    }, {
 	        key: 'handle_responses',
 	        value: function handle_responses(responses, queue) {
 	            for (var i = 0; i < responses.length; ++i) {
@@ -122,7 +132,7 @@ var JSONful =
 	            var request = Object.assign({}, { requests: body }, this._headers);
 
 	            this.emit("request", request);
-	            xhr.open("POST", this.server, true);
+	            xhr.open("POST", this.url, true);
 	            xhr.responseType = 'json';
 	            xhr.setRequestHeader("Content-Type", "application/json");
 	            xhr.send(JSON.stringify(request));
@@ -198,6 +208,10 @@ var JSONful =
 
 	    return Client;
 	}(EventEmitter);
+
+	Client.getStorage = function () {
+	    return localStorage;
+	};
 
 	Client.getXhr = function () {
 	    return new XMLHttpRequest();
@@ -781,6 +795,178 @@ var JSONful =
 	}
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(3)))
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Storage = __webpack_require__(6);
+
+	var Session = function () {
+	    function Session(sessionId, localStorage) {
+	        _classCallCheck(this, Session);
+
+	        this.storage = new Storage.createNamespace(sessionId, localStorage);
+	    }
+
+	    _createClass(Session, [{
+	        key: 'set',
+	        value: function set(name, value) {
+	            return this.storage.setItem(name, value);
+	        }
+	    }, {
+	        key: 'get',
+	        value: function get(name) {
+	            return this.storage.getItem(name);
+	        }
+	    }, {
+	        key: 'logout',
+	        value: function logout() {
+	            this.storage.clear();
+	        }
+	    }]);
+
+	    return Session;
+	}();
+
+	Session.create = function (localStorage, sessionId, client) {
+	    var storage = Storage.createNamespace('jsonful', localStorage);
+	    storage.setItem(client.url, sessionId);
+	    client._session = new Session(sessionId, localStorage);
+	    client._headers['session'] = sessionId;
+	};
+
+	Session.load = function (localStorage, client) {
+	    var storage = Storage.createNamespace('jsonful', localStorage);
+	    var sesId = storage.getItem(client.url);
+	    if (sesId) {
+	        client._session = new Session(sesId, localStorage);
+	        client._headers['session'] = sesId;
+	    }
+	};
+
+	module.exports = Session;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;'use strict';
+
+	// package module for different environments
+	function packageModule(global, name, api) {
+	  if (global.define && global.define.amd) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (api), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	  } else if (true) {
+	    module.exports = api;
+	  } else {
+	    global[name] = api;
+	  }
+	}
+
+	// SNStorage constructor
+	function NSStorage(namespace, storage){
+	  this._ns = namespace;
+	  this._nsRegex = new RegExp(''+namespace+'_');
+	  this._storage = storage;
+	  this._keyCache = null;
+	  this.length = this._keys().length;
+	}
+
+	// Generate an namespaced key
+	NSStorage.prototype._genKey = function(key){
+	  return this._ns + '_' + key;
+	};
+
+	// Check if key is in namespace
+	NSStorage.prototype._inNamespace = function(key){
+	  return key && (key.indexOf(this._ns) === 0);
+	};
+
+	// Check if key exists
+	NSStorage.prototype._exists = function(key){
+	  return !!this.getItem(key);
+	};
+
+	// Get all keys in this namespace
+	NSStorage.prototype._keys = function(){
+	  if(this._keyCache){
+	    return this._keyCache;
+	  }else{
+	    var keys = [];
+	    for(var i=0, len=this._storage.length; i<len; i++) {
+	      var key = this._storage.key(i);
+	      if(this._inNamespace(key)) keys.push(key.replace(this._nsRegex, ''));
+	    }
+	    this._keyCache = keys;
+	    return keys;
+	  }
+	};
+
+	NSStorage.prototype._invalidateCache = function(){
+	  this._keyCache = null;
+	};
+
+	//
+	// STORAGE API
+	// Spec here: http://dev.w3.org/html5/webstorage/#storage-0
+	//
+
+	// Get the key of index idx
+	NSStorage.prototype.key = function(idx){
+	  return this._keys()[idx] || null;
+	};
+
+	// Get item for key
+	NSStorage.prototype.getItem = function(key){
+	  return this._storage.getItem(this._genKey(key));
+	};
+
+	// Set value of key to val
+	NSStorage.prototype.setItem = function(key, val){
+	  if(!this._exists(key)){
+	    this.length++;
+	    this._invalidateCache();
+	  }
+	  this._storage.setItem(this._genKey(key), val);
+	};
+
+	// Remove item from storage
+	NSStorage.prototype.removeItem = function(key){
+	  if(this._exists(key)){
+	    this.length--;
+	    this._invalidateCache();
+	  }
+	  this._storage.removeItem(this._genKey(key));
+	};
+
+	// Clear storage
+	NSStorage.prototype.clear = function(){
+	  var _this = this;
+	  this._keys().forEach(function(key){
+	    _this.removeItem(key);
+	  });
+	  this._invalidateCache();
+	};
+
+	//
+	// API
+	//
+	var API = {
+	  createNamespace: function(namespace, storage){
+	    return new NSStorage(namespace, storage);
+	  }
+	};
+
+	// Module packaging
+	packageModule(this, 'NSStorage', API);
+
 
 /***/ }
 /******/ ]);
