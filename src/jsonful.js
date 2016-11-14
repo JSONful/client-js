@@ -1,6 +1,7 @@
 var EventEmitter = require('micro-events');
 var Promise = require('lie');
 var Session = require('./session');
+var assign  = require('object-assign');
 
 class Client extends EventEmitter {
     constructor(...args) {
@@ -52,7 +53,7 @@ class Client extends EventEmitter {
             });
         };
 
-        let request = Object.assign({}, {requests: body}, this._headers);
+        let request = assign({}, {requests: body}, this._headers);
 
         this.emit("request", request);
         xhr.open("POST", this.url, true);
