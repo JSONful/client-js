@@ -1,17 +1,19 @@
-language: node_js
-node_js:
-    - "6.2"
-    - "6.1"
-    - "6"
-    - "5.1"
-    - "4"
-    - "4.2"
-    - "4.1"
-    - "4.0"
+language: php
+php:
+    - 5.6
+
+env:
+    - TRAVIS_NODE_VERSION="6.2"
+    - TRAVIS_NODE_VERSION="6.1"
+    - TRAVIS_NODE_VERSION="6"
+    - TRAVIS_NODE_VERSION="5.1"
+    - TRAVIS_NODE_VERSION="4"
+    - TRAVIS_NODE_VERSION="4.2"
+    - TRAVIS_NODE_VERSION="4.1"
+    - TRAVIS_NODE_VERSION="4.0"
 
 before_script:
     - npm install
-    - phpenv global 5.6
     - curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/bin --filename=composer
 
 script: npm test
