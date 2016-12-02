@@ -78,24 +78,21 @@
         },
         {
             "name": "crodas/function-discovery",
-            "version": "v0.6.1",
+            "version": "v0.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/crodas/function-discovery.git",
-                "reference": "0c564af13d045b5b8c66153d2e1c9fae7d3483a5"
+                "reference": "34d0bff1585b65611deb73ef023748f73551d5a8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crodas/function-discovery/zipball/0c564af13d045b5b8c66153d2e1c9fae7d3483a5",
-                "reference": "0c564af13d045b5b8c66153d2e1c9fae7d3483a5",
+                "url": "https://api.github.com/repos/crodas/function-discovery/zipball/34d0bff1585b65611deb73ef023748f73551d5a8",
+                "reference": "34d0bff1585b65611deb73ef023748f73551d5a8",
                 "shasum": ""
             },
             "require": {
-                "crodas/file-util": "^0.2",
-                "crodas/notoj": ">= 1.2"
-            },
-            "require-dev": {
-                "crodas/simple-view-engine": "^0.1"
+                "crodas/notoj": ">= 1.2",
+                "crodas/remember": ">=0.3.3"
             },
             "type": "library",
             "autoload": {
@@ -117,26 +114,30 @@
                 }
             ],
             "description": "Discover and remember functions in the filesystem using annotations",
-            "time": "2016-03-19 19:59:48"
+            "time": "2016-11-11 20:20:50"
         },
         {
             "name": "crodas/notoj",
-            "version": "v1.3.3",
+            "version": "v1.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/crodas/Notoj.git",
-                "reference": "8bc8f6d2ba661229090491a838f70ccf558fb4ef"
+                "reference": "ed0c288cc953d08f4241814e3a7cdf4bde490a6e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crodas/Notoj/zipball/8bc8f6d2ba661229090491a838f70ccf558fb4ef",
-                "reference": "8bc8f6d2ba661229090491a838f70ccf558fb4ef",
+                "url": "https://api.github.com/repos/crodas/Notoj/zipball/ed0c288cc953d08f4241814e3a7cdf4bde490a6e",
+                "reference": "ed0c288cc953d08f4241814e3a7cdf4bde490a6e",
                 "shasum": ""
             },
             "require": {
                 "crodas/class-info": "^0.2",
-                "crodas/file-util": ">= 0.2",
+                "crodas/file-util": "^0.2",
+                "crodas/remember": ">=0.3.2",
                 "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "johnkary/phpunit-speedtrap": "^1.0"
             },
             "type": "library",
             "autoload": {
@@ -155,7 +156,46 @@
                 }
             ],
             "description": "Annotation parser. Uses reflection and provides cache out of the box.",
-            "time": "2016-04-04 07:51:27"
+            "time": "2016-11-10 19:55:52"
+        },
+        {
+            "name": "crodas/remember",
+            "version": "v0.4.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/crodas/Remember.git",
+                "reference": "05add7b3d2d9e7b54509b05b4a7c8d0dd2b29e0e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/crodas/Remember/zipball/05add7b3d2d9e7b54509b05b4a7c8d0dd2b29e0e",
+                "reference": "05add7b3d2d9e7b54509b05b4a7c8d0dd2b29e0e",
+                "shasum": ""
+            },
+            "require": {
+                "crodas/file-util": "^0.2.2"
+            },
+            "require-dev": {
+                "crodas/simple-view-engine": "^0.1.37"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Remember": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Cesar Rodas",
+                    "email": "rodas@cesar.com.py"
+                }
+            ],
+            "description": "Remember computations you did before (file cache)",
+            "time": "2016-11-13 14:32:43"
         },
         {
             "name": "jsonful/server",
@@ -163,16 +203,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/JSONful/server.git",
-                "reference": "8a32f11883c083c070720e2bbd333231628a510a"
+                "reference": "97313bc2d7a65a2b6e3d3ad951306212fd117ea6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/JSONful/server/zipball/8a32f11883c083c070720e2bbd333231628a510a",
-                "reference": "8a32f11883c083c070720e2bbd333231628a510a",
+                "url": "https://api.github.com/repos/JSONful/server/zipball/97313bc2d7a65a2b6e3d3ad951306212fd117ea6",
+                "reference": "97313bc2d7a65a2b6e3d3ad951306212fd117ea6",
                 "shasum": ""
             },
             "require": {
-                "crodas/function-discovery": "^0.6.1",
+                "crodas/function-discovery": ">=0.7.1",
                 "pimple/pimple": "^1.0"
             },
             "type": "library",
@@ -192,20 +232,20 @@
                 }
             ],
             "description": "JSON server",
-            "time": "2016-04-20 17:39:43"
+            "time": "2016-11-11 20:33:02"
         },
         {
             "name": "nikic/php-parser",
-            "version": "v2.1.0",
+            "version": "v2.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "47b254ea51f1d6d5dc04b9b299e88346bf2369e3"
+                "reference": "4dd659edadffdc2143e4753df655d866dbfeedf0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/47b254ea51f1d6d5dc04b9b299e88346bf2369e3",
-                "reference": "47b254ea51f1d6d5dc04b9b299e88346bf2369e3",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/4dd659edadffdc2143e4753df655d866dbfeedf0",
+                "reference": "4dd659edadffdc2143e4753df655d866dbfeedf0",
                 "shasum": ""
             },
             "require": {
@@ -243,7 +283,7 @@
                 "parser",
                 "php"
             ],
-            "time": "2016-04-19 13:41:41"
+            "time": "2016-09-16 12:04:44"
         },
         {
             "name": "pimple/pimple",

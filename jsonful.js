@@ -47,7 +47,7 @@ var JSONful =
 
 	'use strict';
 
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -59,12 +59,14 @@ var JSONful =
 
 	var EventEmitter = __webpack_require__(1);
 	var Promise = __webpack_require__(2);
+	var Session = __webpack_require__(4);
+	var assign = __webpack_require__(6);
 
 	var Client = function (_EventEmitter) {
 	    _inherits(Client, _EventEmitter);
 
 	    function Client() {
-	        var _Object$getPrototypeO;
+	        var _ref;
 
 	        _classCallCheck(this, Client);
 
@@ -72,19 +74,28 @@ var JSONful =
 	            args[_key] = arguments[_key];
 	        }
 
-	        var _this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Client)).call.apply(_Object$getPrototypeO, [this].concat(args)));
+	        var _this = _possibleConstructorReturn(this, (_ref = Client.__proto__ || Object.getPrototypeOf(Client)).call.apply(_ref, [this].concat(args)));
 
-	        _this.server = args[0];
+	        _this.url = args[0];
 	        _this._wait = 50;
 	        _this._queue = [];
 	        _this._headers = {};
+	        _this._session = null;
+
+	        Session.load(Client.getStorage(), _this);
+
 	        _this.on('session', function (sessionId) {
-	            _this._headers['session'] = sessionId;
+	            Session.create(Client.getStorage(), sessionId, _this);
 	        });
 	        return _this;
 	    }
 
 	    _createClass(Client, [{
+	        key: 'session',
+	        value: function session() {
+	            return this._session;
+	        }
+	    }, {
 	        key: 'handle_responses',
 	        value: function handle_responses(responses, queue) {
 	            for (var i = 0; i < responses.length; ++i) {
@@ -119,10 +130,10 @@ var JSONful =
 	                });
 	            };
 
-	            var request = Object.assign({}, { requests: body }, this._headers);
+	            var request = assign({}, { requests: body }, this._headers);
 
 	            this.emit("request", request);
-	            xhr.open("POST", this.server, true);
+	            xhr.open("POST", this.url, true);
 	            xhr.responseType = 'json';
 	            xhr.setRequestHeader("Content-Type", "application/json");
 	            xhr.send(JSON.stringify(request));
@@ -168,8 +179,8 @@ var JSONful =
 	        value: function exec(name) {
 	            var _this4 = this;
 
-	            var args = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
-	            var callback = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+	            var args = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+	            var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 
 	            if (typeof args === 'function') {
 	                callback = args;
@@ -198,6 +209,10 @@ var JSONful =
 
 	    return Client;
 	}(EventEmitter);
+
+	Client.getStorage = function () {
+	    return localStorage;
+	};
 
 	Client.getXhr = function () {
 	    return new XMLHttpRequest();
@@ -296,8 +311,8 @@ var JSONful =
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
-	var immediate = __webpack_require__(4);
+	'use strict';
+	var immediate = __webpack_require__(3);
 
 	/* istanbul ignore next */
 	function INTERNAL() {}
@@ -307,11 +322,6 @@ var JSONful =
 	var REJECTED = ['REJECTED'];
 	var FULFILLED = ['FULFILLED'];
 	var PENDING = ['PENDING'];
-	/* istanbul ignore else */
-	if (!process.browser) {
-	  // in which we actually take advantage of JS scoping
-	  var UNHANDLED = ['UNHANDLED'];
-	}
 
 	module.exports = Promise;
 
@@ -322,16 +332,12 @@ var JSONful =
 	  this.state = PENDING;
 	  this.queue = [];
 	  this.outcome = void 0;
-	  /* istanbul ignore else */
-	  if (!process.browser) {
-	    this.handled = UNHANDLED;
-	  }
 	  if (resolver !== INTERNAL) {
 	    safelyResolveThenable(this, resolver);
 	  }
 	}
 
-	Promise.prototype.catch = function (onRejected) {
+	Promise.prototype["catch"] = function (onRejected) {
 	  return this.then(null, onRejected);
 	};
 	Promise.prototype.then = function (onFulfilled, onRejected) {
@@ -340,12 +346,6 @@ var JSONful =
 	    return this;
 	  }
 	  var promise = new this.constructor(INTERNAL);
-	  /* istanbul ignore else */
-	  if (!process.browser) {
-	    if (this.handled === UNHANDLED) {
-	      this.handled = null;
-	    }
-	  }
 	  if (this.state !== PENDING) {
 	    var resolver = this.state === FULFILLED ? onFulfilled : onRejected;
 	    unwrap(promise, resolver, this.outcome);
@@ -418,16 +418,6 @@ var JSONful =
 	handlers.reject = function (self, error) {
 	  self.state = REJECTED;
 	  self.outcome = error;
-	  /* istanbul ignore else */
-	  if (!process.browser) {
-	    if (self.handled === UNHANDLED) {
-	      immediate(function () {
-	        if (self.handled === UNHANDLED) {
-	          process.emit('unhandledRejection', error, self);
-	        }
-	      });
-	    }
-	  }
 	  var i = -1;
 	  var len = self.queue.length;
 	  while (++i < len) {
@@ -575,143 +565,17 @@ var JSONful =
 	  }
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
 /* 3 */
 /***/ function(module, exports) {
 
-	// shim for using process in browser
-
-	var process = module.exports = {};
-
-	// cached from whatever global is present so that test runners that stub it
-	// don't break things.  But we need to wrap it in a try catch in case it is
-	// wrapped in strict mode code which doesn't define any globals.  It's inside a
-	// function because try/catches deoptimize in certain engines.
-
-	var cachedSetTimeout;
-	var cachedClearTimeout;
-
-	(function () {
-	  try {
-	    cachedSetTimeout = setTimeout;
-	  } catch (e) {
-	    cachedSetTimeout = function () {
-	      throw new Error('setTimeout is not defined');
-	    }
-	  }
-	  try {
-	    cachedClearTimeout = clearTimeout;
-	  } catch (e) {
-	    cachedClearTimeout = function () {
-	      throw new Error('clearTimeout is not defined');
-	    }
-	  }
-	} ())
-	var queue = [];
-	var draining = false;
-	var currentQueue;
-	var queueIndex = -1;
-
-	function cleanUpNextTick() {
-	    if (!draining || !currentQueue) {
-	        return;
-	    }
-	    draining = false;
-	    if (currentQueue.length) {
-	        queue = currentQueue.concat(queue);
-	    } else {
-	        queueIndex = -1;
-	    }
-	    if (queue.length) {
-	        drainQueue();
-	    }
-	}
-
-	function drainQueue() {
-	    if (draining) {
-	        return;
-	    }
-	    var timeout = cachedSetTimeout(cleanUpNextTick);
-	    draining = true;
-
-	    var len = queue.length;
-	    while(len) {
-	        currentQueue = queue;
-	        queue = [];
-	        while (++queueIndex < len) {
-	            if (currentQueue) {
-	                currentQueue[queueIndex].run();
-	            }
-	        }
-	        queueIndex = -1;
-	        len = queue.length;
-	    }
-	    currentQueue = null;
-	    draining = false;
-	    cachedClearTimeout(timeout);
-	}
-
-	process.nextTick = function (fun) {
-	    var args = new Array(arguments.length - 1);
-	    if (arguments.length > 1) {
-	        for (var i = 1; i < arguments.length; i++) {
-	            args[i - 1] = arguments[i];
-	        }
-	    }
-	    queue.push(new Item(fun, args));
-	    if (queue.length === 1 && !draining) {
-	        cachedSetTimeout(drainQueue, 0);
-	    }
-	};
-
-	// v8 likes predictible objects
-	function Item(fun, array) {
-	    this.fun = fun;
-	    this.array = array;
-	}
-	Item.prototype.run = function () {
-	    this.fun.apply(null, this.array);
-	};
-	process.title = 'browser';
-	process.browser = true;
-	process.env = {};
-	process.argv = [];
-	process.version = ''; // empty string to avoid regexp issues
-	process.versions = {};
-
-	function noop() {}
-
-	process.on = noop;
-	process.addListener = noop;
-	process.once = noop;
-	process.off = noop;
-	process.removeListener = noop;
-	process.removeAllListeners = noop;
-	process.emit = noop;
-
-	process.binding = function (name) {
-	    throw new Error('process.binding is not supported');
-	};
-
-	process.cwd = function () { return '/' };
-	process.chdir = function (dir) {
-	    throw new Error('process.chdir is not supported');
-	};
-	process.umask = function() { return 0; };
-
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global, process) {'use strict';
+	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 	var Mutation = global.MutationObserver || global.WebKitMutationObserver;
 
 	var scheduleDrain;
 
-	if (process.browser) {
+	{
 	  if (Mutation) {
 	    var called = 0;
 	    var observer = new Mutation(nextTick);
@@ -748,10 +612,6 @@ var JSONful =
 	      setTimeout(nextTick, 0);
 	    };
 	  }
-	} else {
-	  scheduleDrain = function () {
-	    process.nextTick(nextTick);
-	  };
 	}
 
 	var draining;
@@ -780,7 +640,268 @@ var JSONful =
 	  }
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(3)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Storage = __webpack_require__(5);
+
+	var Session = function () {
+	    function Session(sessionId, localStorage) {
+	        _classCallCheck(this, Session);
+
+	        this.storage = new Storage.createNamespace(sessionId, localStorage);
+	    }
+
+	    _createClass(Session, [{
+	        key: 'set',
+	        value: function set(name, value) {
+	            return this.storage.setItem(name, value);
+	        }
+	    }, {
+	        key: 'get',
+	        value: function get(name) {
+	            return this.storage.getItem(name);
+	        }
+	    }, {
+	        key: 'logout',
+	        value: function logout() {
+	            this.storage.clear();
+	        }
+	    }]);
+
+	    return Session;
+	}();
+
+	Session.create = function (localStorage, sessionId, client) {
+	    var storage = Storage.createNamespace('jsonful', localStorage);
+	    storage.setItem(client.url, sessionId);
+	    client._session = new Session(sessionId, localStorage);
+	    client._headers['session'] = sessionId;
+	};
+
+	Session.load = function (localStorage, client) {
+	    var storage = Storage.createNamespace('jsonful', localStorage);
+	    var sesId = storage.getItem(client.url);
+	    if (sesId) {
+	        client._session = new Session(sesId, localStorage);
+	        client._headers['session'] = sesId;
+	    }
+	};
+
+	module.exports = Session;
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;'use strict';
+
+	// package module for different environments
+	function packageModule(global, name, api) {
+	  if (global.define && global.define.amd) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (api), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	  } else if (true) {
+	    module.exports = api;
+	  } else {
+	    global[name] = api;
+	  }
+	}
+
+	// SNStorage constructor
+	function NSStorage(namespace, storage){
+	  this._ns = namespace;
+	  this._nsRegex = new RegExp(''+namespace+'_');
+	  this._storage = storage;
+	  this._keyCache = null;
+	  this.length = this._keys().length;
+	}
+
+	// Generate an namespaced key
+	NSStorage.prototype._genKey = function(key){
+	  return this._ns + '_' + key;
+	};
+
+	// Check if key is in namespace
+	NSStorage.prototype._inNamespace = function(key){
+	  return key && (key.indexOf(this._ns) === 0);
+	};
+
+	// Check if key exists
+	NSStorage.prototype._exists = function(key){
+	  return !!this.getItem(key);
+	};
+
+	// Get all keys in this namespace
+	NSStorage.prototype._keys = function(){
+	  if(this._keyCache){
+	    return this._keyCache;
+	  }else{
+	    var keys = [];
+	    for(var i=0, len=this._storage.length; i<len; i++) {
+	      var key = this._storage.key(i);
+	      if(this._inNamespace(key)) keys.push(key.replace(this._nsRegex, ''));
+	    }
+	    this._keyCache = keys;
+	    return keys;
+	  }
+	};
+
+	NSStorage.prototype._invalidateCache = function(){
+	  this._keyCache = null;
+	};
+
+	//
+	// STORAGE API
+	// Spec here: http://dev.w3.org/html5/webstorage/#storage-0
+	//
+
+	// Get the key of index idx
+	NSStorage.prototype.key = function(idx){
+	  return this._keys()[idx] || null;
+	};
+
+	// Get item for key
+	NSStorage.prototype.getItem = function(key){
+	  return this._storage.getItem(this._genKey(key));
+	};
+
+	// Set value of key to val
+	NSStorage.prototype.setItem = function(key, val){
+	  if(!this._exists(key)){
+	    this.length++;
+	    this._invalidateCache();
+	  }
+	  this._storage.setItem(this._genKey(key), val);
+	};
+
+	// Remove item from storage
+	NSStorage.prototype.removeItem = function(key){
+	  if(this._exists(key)){
+	    this.length--;
+	    this._invalidateCache();
+	  }
+	  this._storage.removeItem(this._genKey(key));
+	};
+
+	// Clear storage
+	NSStorage.prototype.clear = function(){
+	  var _this = this;
+	  this._keys().forEach(function(key){
+	    _this.removeItem(key);
+	  });
+	  this._invalidateCache();
+	};
+
+	//
+	// API
+	//
+	var API = {
+	  createNamespace: function(namespace, storage){
+	    return new NSStorage(namespace, storage);
+	  }
+	};
+
+	// Module packaging
+	packageModule(this, 'NSStorage', API);
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	'use strict';
+	/* eslint-disable no-unused-vars */
+	var hasOwnProperty = Object.prototype.hasOwnProperty;
+	var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+
+	function toObject(val) {
+		if (val === null || val === undefined) {
+			throw new TypeError('Object.assign cannot be called with null or undefined');
+		}
+
+		return Object(val);
+	}
+
+	function shouldUseNative() {
+		try {
+			if (!Object.assign) {
+				return false;
+			}
+
+			// Detect buggy property enumeration order in older V8 versions.
+
+			// https://bugs.chromium.org/p/v8/issues/detail?id=4118
+			var test1 = new String('abc');  // eslint-disable-line
+			test1[5] = 'de';
+			if (Object.getOwnPropertyNames(test1)[0] === '5') {
+				return false;
+			}
+
+			// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+			var test2 = {};
+			for (var i = 0; i < 10; i++) {
+				test2['_' + String.fromCharCode(i)] = i;
+			}
+			var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+				return test2[n];
+			});
+			if (order2.join('') !== '0123456789') {
+				return false;
+			}
+
+			// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+			var test3 = {};
+			'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+				test3[letter] = letter;
+			});
+			if (Object.keys(Object.assign({}, test3)).join('') !==
+					'abcdefghijklmnopqrst') {
+				return false;
+			}
+
+			return true;
+		} catch (e) {
+			// We don't expect any of the above to throw, but better to be safe.
+			return false;
+		}
+	}
+
+	module.exports = shouldUseNative() ? Object.assign : function (target, source) {
+		var from;
+		var to = toObject(target);
+		var symbols;
+
+		for (var s = 1; s < arguments.length; s++) {
+			from = Object(arguments[s]);
+
+			for (var key in from) {
+				if (hasOwnProperty.call(from, key)) {
+					to[key] = from[key];
+				}
+			}
+
+			if (Object.getOwnPropertySymbols) {
+				symbols = Object.getOwnPropertySymbols(from);
+				for (var i = 0; i < symbols.length; i++) {
+					if (propIsEnumerable.call(from, symbols[i])) {
+						to[symbols[i]] = from[symbols[i]];
+					}
+				}
+			}
+		}
+
+		return to;
+	};
+
 
 /***/ }
 /******/ ]);
