@@ -47,7 +47,7 @@ var JSONful =
 
 	'use strict';
 
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -59,14 +59,14 @@ var JSONful =
 
 	var EventEmitter = __webpack_require__(1);
 	var Promise = __webpack_require__(2);
-	var Session = __webpack_require__(5);
-	var assign = __webpack_require__(7);
+	var Session = __webpack_require__(4);
+	var assign = __webpack_require__(6);
 
 	var Client = function (_EventEmitter) {
 	    _inherits(Client, _EventEmitter);
 
 	    function Client() {
-	        var _Object$getPrototypeO;
+	        var _ref;
 
 	        _classCallCheck(this, Client);
 
@@ -74,7 +74,7 @@ var JSONful =
 	            args[_key] = arguments[_key];
 	        }
 
-	        var _this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Client)).call.apply(_Object$getPrototypeO, [this].concat(args)));
+	        var _this = _possibleConstructorReturn(this, (_ref = Client.__proto__ || Object.getPrototypeOf(Client)).call.apply(_ref, [this].concat(args)));
 
 	        _this.url = args[0];
 	        _this._wait = 50;
@@ -179,8 +179,8 @@ var JSONful =
 	        value: function exec(name) {
 	            var _this4 = this;
 
-	            var args = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
-	            var callback = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+	            var args = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+	            var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 
 	            if (typeof args === 'function') {
 	                callback = args;
@@ -311,8 +311,8 @@ var JSONful =
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
-	var immediate = __webpack_require__(4);
+	'use strict';
+	var immediate = __webpack_require__(3);
 
 	/* istanbul ignore next */
 	function INTERNAL() {}
@@ -322,11 +322,6 @@ var JSONful =
 	var REJECTED = ['REJECTED'];
 	var FULFILLED = ['FULFILLED'];
 	var PENDING = ['PENDING'];
-	/* istanbul ignore else */
-	if (!process.browser) {
-	  // in which we actually take advantage of JS scoping
-	  var UNHANDLED = ['UNHANDLED'];
-	}
 
 	module.exports = Promise;
 
@@ -337,16 +332,12 @@ var JSONful =
 	  this.state = PENDING;
 	  this.queue = [];
 	  this.outcome = void 0;
-	  /* istanbul ignore else */
-	  if (!process.browser) {
-	    this.handled = UNHANDLED;
-	  }
 	  if (resolver !== INTERNAL) {
 	    safelyResolveThenable(this, resolver);
 	  }
 	}
 
-	Promise.prototype.catch = function (onRejected) {
+	Promise.prototype["catch"] = function (onRejected) {
 	  return this.then(null, onRejected);
 	};
 	Promise.prototype.then = function (onFulfilled, onRejected) {
@@ -355,12 +346,6 @@ var JSONful =
 	    return this;
 	  }
 	  var promise = new this.constructor(INTERNAL);
-	  /* istanbul ignore else */
-	  if (!process.browser) {
-	    if (this.handled === UNHANDLED) {
-	      this.handled = null;
-	    }
-	  }
 	  if (this.state !== PENDING) {
 	    var resolver = this.state === FULFILLED ? onFulfilled : onRejected;
 	    unwrap(promise, resolver, this.outcome);
@@ -433,16 +418,6 @@ var JSONful =
 	handlers.reject = function (self, error) {
 	  self.state = REJECTED;
 	  self.outcome = error;
-	  /* istanbul ignore else */
-	  if (!process.browser) {
-	    if (self.handled === UNHANDLED) {
-	      immediate(function () {
-	        if (self.handled === UNHANDLED) {
-	          process.emit('unhandledRejection', error, self);
-	        }
-	      });
-	    }
-	  }
 	  var i = -1;
 	  var len = self.queue.length;
 	  while (++i < len) {
@@ -590,143 +565,17 @@ var JSONful =
 	  }
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
 /* 3 */
 /***/ function(module, exports) {
 
-	// shim for using process in browser
-
-	var process = module.exports = {};
-
-	// cached from whatever global is present so that test runners that stub it
-	// don't break things.  But we need to wrap it in a try catch in case it is
-	// wrapped in strict mode code which doesn't define any globals.  It's inside a
-	// function because try/catches deoptimize in certain engines.
-
-	var cachedSetTimeout;
-	var cachedClearTimeout;
-
-	(function () {
-	  try {
-	    cachedSetTimeout = setTimeout;
-	  } catch (e) {
-	    cachedSetTimeout = function () {
-	      throw new Error('setTimeout is not defined');
-	    }
-	  }
-	  try {
-	    cachedClearTimeout = clearTimeout;
-	  } catch (e) {
-	    cachedClearTimeout = function () {
-	      throw new Error('clearTimeout is not defined');
-	    }
-	  }
-	} ())
-	var queue = [];
-	var draining = false;
-	var currentQueue;
-	var queueIndex = -1;
-
-	function cleanUpNextTick() {
-	    if (!draining || !currentQueue) {
-	        return;
-	    }
-	    draining = false;
-	    if (currentQueue.length) {
-	        queue = currentQueue.concat(queue);
-	    } else {
-	        queueIndex = -1;
-	    }
-	    if (queue.length) {
-	        drainQueue();
-	    }
-	}
-
-	function drainQueue() {
-	    if (draining) {
-	        return;
-	    }
-	    var timeout = cachedSetTimeout(cleanUpNextTick);
-	    draining = true;
-
-	    var len = queue.length;
-	    while(len) {
-	        currentQueue = queue;
-	        queue = [];
-	        while (++queueIndex < len) {
-	            if (currentQueue) {
-	                currentQueue[queueIndex].run();
-	            }
-	        }
-	        queueIndex = -1;
-	        len = queue.length;
-	    }
-	    currentQueue = null;
-	    draining = false;
-	    cachedClearTimeout(timeout);
-	}
-
-	process.nextTick = function (fun) {
-	    var args = new Array(arguments.length - 1);
-	    if (arguments.length > 1) {
-	        for (var i = 1; i < arguments.length; i++) {
-	            args[i - 1] = arguments[i];
-	        }
-	    }
-	    queue.push(new Item(fun, args));
-	    if (queue.length === 1 && !draining) {
-	        cachedSetTimeout(drainQueue, 0);
-	    }
-	};
-
-	// v8 likes predictible objects
-	function Item(fun, array) {
-	    this.fun = fun;
-	    this.array = array;
-	}
-	Item.prototype.run = function () {
-	    this.fun.apply(null, this.array);
-	};
-	process.title = 'browser';
-	process.browser = true;
-	process.env = {};
-	process.argv = [];
-	process.version = ''; // empty string to avoid regexp issues
-	process.versions = {};
-
-	function noop() {}
-
-	process.on = noop;
-	process.addListener = noop;
-	process.once = noop;
-	process.off = noop;
-	process.removeListener = noop;
-	process.removeAllListeners = noop;
-	process.emit = noop;
-
-	process.binding = function (name) {
-	    throw new Error('process.binding is not supported');
-	};
-
-	process.cwd = function () { return '/' };
-	process.chdir = function (dir) {
-	    throw new Error('process.chdir is not supported');
-	};
-	process.umask = function() { return 0; };
-
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global, process) {'use strict';
+	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 	var Mutation = global.MutationObserver || global.WebKitMutationObserver;
 
 	var scheduleDrain;
 
-	if (process.browser) {
+	{
 	  if (Mutation) {
 	    var called = 0;
 	    var observer = new Mutation(nextTick);
@@ -763,10 +612,6 @@ var JSONful =
 	      setTimeout(nextTick, 0);
 	    };
 	  }
-	} else {
-	  scheduleDrain = function () {
-	    process.nextTick(nextTick);
-	  };
 	}
 
 	var draining;
@@ -795,10 +640,10 @@ var JSONful =
 	  }
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(3)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 5 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -807,7 +652,7 @@ var JSONful =
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var Storage = __webpack_require__(6);
+	var Storage = __webpack_require__(5);
 
 	var Session = function () {
 	    function Session(sessionId, localStorage) {
@@ -855,7 +700,7 @@ var JSONful =
 	module.exports = Session;
 
 /***/ },
-/* 6 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;'use strict';
@@ -970,7 +815,7 @@ var JSONful =
 
 
 /***/ },
-/* 7 */
+/* 6 */
 /***/ function(module, exports) {
 
 	'use strict';
